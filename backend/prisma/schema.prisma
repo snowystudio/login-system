@@ -1,0 +1,26 @@
+// Prisma Schema for Login System
+// 用户数据模型
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// 用户表
+/// 存储用户基本信息和认证凭据
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String?   // bcrypt 加密后的密码，OAuth 用户为空
+  githubId        String?   @unique // GitHub OAuth 用户 ID
+  githubUsername  String?   // GitHub 用户名
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([email])
+  @@index([githubId])
+}
