@@ -3,7 +3,7 @@ import { Form, Input, Button, Typography, message as antdMessage } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { loginSchema, type LoginFormData } from '../utils/validation';
+import type { LoginFormData } from '../utils/validation';
 
 const { Title } = Typography;
 
