@@ -36,8 +36,10 @@
 
 | 名称 | 值 | 说明 |
 |------|-----|------|
-| `GITHUB_CLIENT_ID` | `<以后获取>` | OAuth App（暂缓） |
-| `GITHUB_CLIENT_SECRET` | `<以后获取>` | OAuth App（暂缓） |
+| `GH_CLIENT_ID` | `<以后获取>` | OAuth App（暂缓） |
+| `GH_CLIENT_SECRET` | `<以后获取>` | OAuth App（暂缓） |
+
+⚠️ **注意：** 不能使用 `GITHUB_` 前缀，这是 GitHub Actions 保留的。使用 `GH_` 前缀。
 
 ### 如何获取（以后需要时）
 
