@@ -1,0 +1,15 @@
+# Code Owners - 代码审查负责人
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# 默认审查人
+* @snowystudio
+
+# 后端代码
+/backend/ @snowystudio
+
+# 前端代码
+/frontend/ @snowystudio
+
+# 基础设施
+/.github/ @snowystudio
+/docker-compose.yml @snowystudio
