@@ -6,6 +6,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+# Install OpenSSL 3 for Prisma compatibility
+RUN apt-get update && apt-get install -y libssl3 && rm -rf /var/lib/apt/lists/*
 RUN npx prisma generate
 RUN npm run build
 
@@ -13,8 +15,8 @@ FROM node:20-bookworm-slim
 
 WORKDIR /app
 
-# Install OpenSSL for Prisma
-RUN apt-get update && apt-get install -y libssl1.1 && rm -rf /var/lib/apt/lists/*
+# Install OpenSSL 3 for Prisma compatibility
+RUN apt-get update && apt-get install -y libssl3 && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 RUN npm ci --only=production
