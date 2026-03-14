@@ -23,12 +23,30 @@
 
 **添加以下 Secrets：**
 
+## 必需配置（2 个）
+
 | 名称 | 值 | 说明 |
 |------|-----|------|
 | `JWT_SECRET` | `e/t7H+GUpXu/CyAan2MZX8dMWrppR1V5RY2D6grgeHM=` | 已生成，直接复制 |
 | `DB_PASSWORD` | `<你的强密码>` | 数据库密码 |
-| `GITHUB_CLIENT_ID` | `<你的 Client ID>` | OAuth App（可选） |
-| `GITHUB_CLIENT_SECRET` | `<你的 Client Secret>` | OAuth App（可选） |
+
+## 可选配置（GitHub OAuth 登录）
+
+**现在不需要！** 这是用于 GitHub 一键登录功能，后续迭代再配置。
+
+| 名称 | 值 | 说明 |
+|------|-----|------|
+| `GITHUB_CLIENT_ID` | `<以后获取>` | OAuth App（暂缓） |
+| `GITHUB_CLIENT_SECRET` | `<以后获取>` | OAuth App（暂缓） |
+
+### 如何获取（以后需要时）
+
+1. 访问：https://github.com/settings/applications/new
+2. 填写：
+   - Application name: `Login System`
+   - Homepage URL: `http://localhost:80`
+   - Callback URL: `http://localhost:3000/api/auth/github/callback`
+3. 复制 Client ID 和 Secret 到这里
 
 **步骤：**
 1. 点击 **New repository secret**
