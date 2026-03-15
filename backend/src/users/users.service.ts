@@ -9,20 +9,13 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   private prisma: PrismaClient;
-  private readonly BCRYPT_COST = 12; // bcrypt 加密成本因子
+  private readonly BCRYPT_COST = 12;
 
   constructor() {
     this.prisma = new PrismaClient();
   }
 
-  /**
-   * 创建新用户（注册）
-   * @param email 用户邮箱
-   * @param password 明文密码
-   * @returns 创建的用户信息（不含密码）
-   */
   async create(email: string, password: string) {
-    // 检查邮箱是否已存在
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -31,82 +24,105 @@ export class UsersService {
       throw new ConflictException('该邮箱已被注册');
     }
 
-    // bcrypt 加密密码（cost=12）
     const passwordHash = await bcrypt.hash(password, this.BCRYPT_COST);
 
-    // 创建用户
     const user = await this.prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-      },
+      data: { email, passwordHash },
     });
 
     return this.sanitizeUser(user);
   }
 
-  /**
-   * 通过邮箱查找用户
-   * @param email 用户邮箱
-   * @returns 用户信息（含密码哈希，用于登录验证）
-   */
   async findByEmail(email: string) {
-    return this.prisma.user.findUnique({
-      where: { email },
-    });
+    return this.prisma.user.findUnique({ where: { email } });
   }
 
-  /**
-   * 通过 GitHub ID 查找用户
-   * @param githubId GitHub 用户 ID
-   * @returns 用户信息
-   */
   async findByGithubId(githubId: string) {
-    return this.prisma.user.findUnique({
-      where: { githubId },
-    });
+    return this.prisma.user.findUnique({ where: { githubId } });
   }
 
-  /**
-   * 通过 ID 查找用户
-   * @param id 用户 ID
-   * @returns 用户信息
-   */
   async findById(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-    });
-
+    const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
       throw new NotFoundException('用户不存在');
     }
-
-    return this.sanitizeUser(user);
+    return user; // 返回完整用户对象（包含 passwordHash）
   }
 
-  /**
-   * 验证密码
-   * @param password 明文密码
-   * @param passwordHash 加密后的密码哈希
-   * @returns 验证结果
-   */
   async validatePassword(password: string, passwordHash: string): Promise<boolean> {
     return bcrypt.compare(password, passwordHash);
   }
 
   /**
-   * 清理用户数据（移除敏感信息）
-   * @param user 原始用户对象
-   * @returns 清理后的用户对象
+   * 更新密码
    */
+  async updatePassword(userId: string, newPasswordHash: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newPasswordHash },
+    });
+  }
+
+  /**
+   * 强制修改密码
+   */
+  async forcePasswordChange(userId: string, forceChange: boolean, reason?: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { 
+        forcePasswordChange: forceChange,
+        forceChangeReason: reason || null,
+      },
+    });
+  }
+
+  /**
+   * 查找重置 Token
+   */
+  async findResetToken(token: string) {
+    return this.prisma.passwordResetToken.findUnique({
+      where: { token },
+      include: { user: true },
+    });
+  }
+
+  /**
+   * 创建重置 Token
+   */
+  async createResetToken(userId: string, token: string, expiresAt: Date) {
+    return this.prisma.passwordResetToken.create({
+      data: { userId, token, expiresAt },
+    });
+  }
+
+  /**
+   * 标记 Token 为已使用
+   */
+  async markResetTokenUsed(token: string) {
+    return this.prisma.passwordResetToken.update({
+      where: { token },
+      data: { used: true },
+    });
+  }
+
+  /**
+   * 删除未过期的旧 Token
+   */
+  async deleteUnusedResetTokens(userId: string) {
+    return this.prisma.passwordResetToken.deleteMany({
+      where: {
+        userId,
+        used: false,
+        expiresAt: { gt: new Date() },
+      },
+    });
+  }
+
   private sanitizeUser(user: any) {
     const { passwordHash, ...result } = user;
     return result;
   }
 
-  /**
-   * 关闭 Prisma 连接（应用关闭时调用）
-   */
   async onModuleDestroy() {
     await this.prisma.$disconnect();
   }
